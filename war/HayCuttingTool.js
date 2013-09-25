@@ -1,5 +1,5 @@
 // Author: Wenting Zhao ( wentingzhao@ufl.edu )
-// Version: 1.1, latest updated at 09/18/2013
+// Version: 1.2, latest updated at 09/23/2013
 // Description: This code file define three main functions: dataSeries, dataControl, and highchartControl
 // 
 // dataSeries is a self defined data structure:
@@ -271,14 +271,14 @@ function highchartControl() {
 		var chartTitle, chartSubtitle, yTitle, seriesName;
 		var xAxisCategories = dataseries.getLocalTimeData();
 		
-		chart.xAxis[0].setCategories(xAxisCategories);   //very important step!!!
-		chart.xAxis[0].update (
-			{tickInterval: 24*4},
-			{labels: {
-				step: 96,
-				formatter: function() { return this.value; }
-			}}
-		);
+//		chart.xAxis[0].setCategories(xAxisCategories);   //very important step!!!
+//		chart.xAxis[0].update (
+//			{tickInterval: 24*4},
+//			{labels: {
+//				step: 96,
+//				formatter: function() { return this.value; }
+//			}}
+//		);
 		
 		chart.series[0].setData(dataseries.getCurrentDisplay(paraChoice));
 		

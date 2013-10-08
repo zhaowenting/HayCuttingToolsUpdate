@@ -1,5 +1,5 @@
 // Author: Wenting Zhao ( wentingzhao@ufl.edu )
-// Version: 1.2, latest updated at 09/23/2013
+// Version: 1.2, latest updated at 10/07/2013
 // Description: This code file define three main functions: dataSeries, dataControl, and highchartControl
 // 
 // dataSeries is a self defined data structure:
@@ -100,7 +100,7 @@ function dataControl() {
 		var startDate = new Date(requesttime.valueOf() - 7*24*3600*1000);
 		startDate.setHours(0,0,0,0);    //Date.setHours(hour,min,sec,millisec) 
 		
-		var oneInterval = 900*1000;	//every 15 minutes
+		var oneInterval = 3600*1000;	//every 1 hour!!!!
 		for (var fmtTimeSeries=[],ms=startDate*1,last=requesttime*1;ms<last;ms+=oneInterval) {
 			fmtTimeSeries.push(new Date(ms));
 		}
@@ -119,7 +119,7 @@ function dataControl() {
 		var cfConverter;
 		var reggie = /(\d{4})-(\d{2})-(\d{2}) (\d{2}):(\d{2}):(\d{2})/;
 		
-		var url = "http://test.fawn.ifas.ufl.edu/controller.php/haycutting/stnid/"+dataseries.getStationID();
+		var url = "http://test.fawn.ifas.ufl.edu/controller.php/haycutting/hourly/"+dataseries.getStationID();
 		$.getJSON(url, function(dataJson) {
 			data = dataJson;
 		}).done( function() {
@@ -161,15 +161,17 @@ function dataControl() {
 					localTime[dataSourcePlot].setHours(dateText[4],dateText[5],dateText[6],0);
 					
 					if(formattedTimeArray[tplot].valueOf()==localTime[dataSourcePlot].valueOf()) {
-						cfConverter=parseFloat(data.data[dataSourcePlot].temp_air_2m_F);
-						var precision =(cfConverter*1.8+32).toFixed(2);
+						// cfConverter=parseFloat(data.data[dataSourcePlot].t2m_f_hourly_avg);
+// 						var precision =(cfConverter*1.8+32).toFixed(2);
+// 						temperatureData[tplot] = parseFloat(precision);
+						var precision =(parseFloat(data.data[dataSourcePlot].t2m_f_hourly_avg)).toFixed(2);
 						temperatureData[tplot] = parseFloat(precision);
 						 // = precision.toFixed(2);
 						//Convert temperature data of Celsius into Fahrenheit
 						
-						humidityData[tplot]=parseFloat(data.data[dataSourcePlot].rh_2m_pct);
-						solarradiData[tplot]=parseFloat(data.data[dataSourcePlot].rfd_2m_wm2);
-						rainfallData[tplot]=parseFloat(data.data[dataSourcePlot].rain_2m_inches);
+						humidityData[tplot]=parseFloat(data.data[dataSourcePlot].rh_pct_hourly_avg);
+						solarradiData[tplot]=parseFloat(data.data[dataSourcePlot].rfd_wm2_hourly_avg);
+						rainfallData[tplot]=parseFloat(data.data[dataSourcePlot].rain_inch_hourly_sum);
 						
 						dataSourcePlot+=1;	
 					}
@@ -197,6 +199,8 @@ function dataControl() {
 			dataseries.setSolarradiData(solarradiData);
 			dataseries.setRainfallData(rainfallData);
 			dataseries.setLocalTimeData(formattedTimeArray);
+			
+			console.log("the temperaturedata is"+dataseries.getTemperatureData());
 			
 		});
 	}
@@ -244,9 +248,9 @@ function highchartControl() {
 		
 		chart.xAxis[0].setCategories(xAxisCategories);   //very important step!!!
 		chart.xAxis[0].update (
-			{tickInterval: 24*4},
+			{tickInterval: 24},
 			{labels: {
-				step: 96,
+				step: 24,
 				formatter: function() { return this.value; }
 			}}
 		);

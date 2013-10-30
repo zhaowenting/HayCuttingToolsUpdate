@@ -362,7 +362,7 @@ function highchartControl() {
 				break;
 			case "2":	//humididty ideal zone: < 70%
 				chart.yAxis[0].addPlotBand({
-					from: 40,
+					from: 0,
 					to: 70,
 					color: '#43BFA7',
 					label: {
@@ -441,7 +441,8 @@ function highchartControl() {
 
 function tableControl(newData) {
 	// 12 items of data in a table page
-  	var maxRows = 12;
+	$('.paginated-table tr').not(function(){if ($(this).has('th').length){return true}}).remove();
+	var maxRows = 12;
 	var tRowData=new Array();
 	var hRowData=new Array();
 	var sRowData=new Array();
@@ -537,8 +538,8 @@ function updateView() {
 	var chart = $('#container').highcharts();
 	chart.showLoading('Loading chart...');
 
-	document.getElementById("checkRef").checked=false;
-	newChartController.showReference(0);
+	document.getElementById("checkRef").checked=true;
+//	newChartController.showReference(0);
 	
 	var currentStationID=stationList.options[stationList.selectedIndex].value;
 	
@@ -554,8 +555,9 @@ function updateView() {
 			newChartController.updateChart(chart, newData);
 			chart.hideLoading();
 			
-			$('.paginated-table tr').not(function(){if ($(this).has('th').length){return true}}).remove();
+//			$('.paginated-table tr').not(function(){if ($(this).has('th').length){return true}}).remove();
 			tableControl(newData);
+			showRef();
 		},500);
 	}
 }
@@ -617,7 +619,7 @@ function startPage() {
         newDataController.choiceLoad();
         document.getElementById("stationList").value = 260;
         document.getElementById("paraList").value = 1;
-        document.getElementById("checkRef").checked=false;
+        document.getElementById("checkRef").checked=true;
  
         $('#container').highcharts({
        	 chart: {
@@ -646,7 +648,8 @@ function startPage() {
  
         newDataController.requestData(newData);
         setTimeout(function(){ 
-       	  newChartController.initialChart(newData);
-	  tableControl(newData); },500);
+       	  newChartController.initialChart(newData); 
+       	  tableControl(newData); 
+       	  showRef();},500);
 }
 

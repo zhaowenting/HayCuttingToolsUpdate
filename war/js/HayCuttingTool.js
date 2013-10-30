@@ -439,6 +439,11 @@ function highchartControl() {
 	}
 }
 
+
+//tableControl
+//show past data in the table (4 days)
+//- input:newData (dataSeries), output: table
+
 function tableControl(newData) {
 	// 12 items of data in a table page
 	$('.paginated-table tr').not(function(){if ($(this).has('th').length){return true}}).remove();
@@ -546,6 +551,7 @@ function updateView() {
 	if(currentStationID==newData.getStationID()) {
 		newChartController.updateChart(chart, newData);
 		chart.hideLoading();
+		showRef();
 	}
 	
 	else {

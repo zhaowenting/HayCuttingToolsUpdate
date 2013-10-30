@@ -1,0 +1,47 @@
+.paginated-table {
+    border: 1px solid black;
+    padding: 10px; 10px;
+    margin-bottom: 10px;
+}
+
+.theader {
+    background-color: #ddd;
+}
+
+.theader, .tcol {
+    border: 1px solid black;
+    padding: 5px 5px;
+}
+
+.prev, .next {
+    width: 50px;
+    text-align: center;
+    margin-right: 10px;
+    user-select: none;
+   -o-user-select:none;
+   -moz-user-select: none;
+   -khtml-user-select: none;
+   -webkit-user-select: none;
+}
+
+.prev, .next {
+    border: 1px solid green;
+    cursor: pointer;
+}
+
+.prev.disabled, .next.disabled {
+    border: 1px solid red;
+    cursor: default;
+}
+
+.good {
+	background-color: #43BFA7;
+        border: 1px solid black;
+        padding: 5px 5px;
+}
+
+.bad {
+	background-color: #F36966;
+        border: 1px solid black;
+        padding: 5px 5px;
+}

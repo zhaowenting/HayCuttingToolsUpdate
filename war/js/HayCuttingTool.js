@@ -1,19 +1,25 @@
-// Author: Wenting Zhao ( wentingzhao@ufl.edu )
-// Version: 1.2, latest updated at 10/07/2013
-// Description: This code file define three main functions: dataSeries, dataControl, and highchartControl
-// 
-// dataSeries is a self defined data structure:
-// - regulates the basic data format: (stationID, requestTime, and four 7-day data array: temperature, humidity, solar radiation, and rainfall)
-// - defines the basic data operation: get/set methods, and get display data
-// 
-// dataControl 
-// - consists of requestData and choiceLoad operations
-// 
-// highchartControl 
-// - consists of three operations: initialChart(Alachua, Temperature), updateChart, and showReference
-// function updateView() is triggered by user changing station or parameter view
-// function showRef() is triggered by reference zone checkbox is checked or unchecked
-// function startPage() is the initial loaded page
+/*
+Author: Wenting Zhao ( wentingzhao@ufl.edu )
+Version: 2.0, latest updated at 10/29/2013, add function tableControl
+Description: This code file define three main functions: dataSeries, dataControl, highchartControl, tableControl
+
+dataSeries is a self defined data structure:
+- regulates the basic data format: (stationID, requestTime, and four 7-day data array: temperature, humidity, solar radiation, and rainfall)
+- defines the basic data operation: get/set methods, and get display data
+
+dataControl 
+- consists of requestData and choiceLoad operations
+
+highchartControl 
+- consists of three operations: initialChart(Alachua, Temperature), updateChart, and showReference
+function updateView() is triggered by user changing station or parameter view
+function showRef() is triggered by reference zone checkbox is checked or unchecked
+function startPage() is the initial loaded page
+ 
+tableControl
+show past data in the table (4 days)
+- input:newData (dataSeries), output: table
+*/
 
 
 function dataSeries() {
@@ -200,7 +206,7 @@ function dataControl() {
 			dataseries.setRainfallData(rainfallData);
 			dataseries.setLocalTimeData(formattedTimeArray);
 			
-			console.log("the temperaturedata is"+dataseries.getTemperatureData());
+			// console.log("the temperaturedata is"+dataseries.getTemperatureData());
 			
 		});
 	}
@@ -255,7 +261,7 @@ function highchartControl() {
 			}}
 		);
 		
-		chart.series[0].setData(dataseries.getCurrentDisplay("1"));
+		chart.series[0].setData(dataseries.getCurrentDisplay("1"));  //initialize: temperature
 		chart.series[0].update(
 			{name: "Temperature"}
 		);
@@ -334,11 +340,11 @@ function highchartControl() {
 		
 		if(showMark) {
 			switch (paraChoice) {
-			case "1":
+			case "1":	// temperature ideal zone: >30oC
 				chart.yAxis[0].addPlotBand({
 					from: 86,
 					to: 95,
-					color: '#99FF99',
+					color: '#43BFA7',
 					label: {
 						text: 'Ideal Zone',
 						align: 'right',
@@ -350,15 +356,15 @@ function highchartControl() {
 				chart.yAxis[0].addPlotBand({
 					from: 0,
 					to: 86,
-					color: '#FF9999',
+					color: '#F36966',
 					id: 'plot-band-temperature-nonideal'
 				});
 				break;
-			case "2":
+			case "2":	//humididty ideal zone: < 70%
 				chart.yAxis[0].addPlotBand({
-					from: 70,
-					to: 110,
-					color: '#99FF99',
+					from: 40,
+					to: 70,
+					color: '#43BFA7',
 					label: {
 						text: 'Ideal Zone',
 						align: 'right',
@@ -368,17 +374,17 @@ function highchartControl() {
 				});
 				
 				chart.yAxis[0].addPlotBand({
-					from: 40,
-					to: 70,
-					color: '#FF9999',
+					from: 70,
+					to: 110,
+					color: '#F36966',
 					id: 'plot-band-humidity-nonideal'
 				});
 				break;
-			case "3":
+			case "3":	//solar radiance ideal zone: 600-700 W/m2
 				chart.yAxis[0].addPlotBand({
 					from: 600,
 					to: 700,
-					color: '#99FF99',
+					color: '#43BFA7',
 					label: {
 						text: 'Ideal Zone',
 						align: 'right',
@@ -390,11 +396,11 @@ function highchartControl() {
 				chart.yAxis[0].addPlotBand({
 					from: 0,
 					to: 600,
-					color: '#FF9999',
+					color: '#F36966',
 					id: 'plot-band-solarradi-nonideal'
 				});
 				break;
-			case "4":
+			case "4":	// rainfall ideal zone: 0
 				chart.yAxis[0].addPlotLine({
 					value: 0,
 					width: 6,
@@ -402,14 +408,14 @@ function highchartControl() {
 						text: 'Ideal Value: 0',
 						align: 'right'
 					},
-					color: '#99FF99',
+					color: '#43BFA7',
 					id: 'plot-line-rainfall-ideal'
 				});
 				
 				chart.yAxis[0].addPlotBand({
 					from: 0,
 					to: 1,
-					color: '#FF9999',
+					color: '#F36966',
 					id: 'plot-band-rainfall-nonideal'
 				});
 
@@ -433,6 +439,98 @@ function highchartControl() {
 	}
 }
 
+function tableControl(newData) {
+	// 12 items of data in a table page
+  	var maxRows = 12;
+	var tRowData=new Array();
+	var hRowData=new Array();
+	var sRowData=new Array();
+	var rRowData=new Array();
+	var timeRowData=new Array();
+	
+	tRowData = newData.getTemperatureData();
+	hRowData = newData.getHumidityData();
+	rRowData = newData.getRainfallData();
+	sRowData = newData.getSolarradiData();
+	timeRowData = newData.getLocalTimeData();
+		
+	var tableRange = tRowData.length;
+	// console.log("tableRange: "+tableRange);
+	var cTable = $('.paginated-table');
+	for ( var i = tableRange-1; i >= 72 ;i--) {
+		if(!!tRowData[i])  //if the data value is not null
+		{
+			var localDate = new Date(timeRowData[i]).toString();
+			var time = localDate.split(" ");	//After format Aug 07 2013 17:00:00
+			var timeRow = time[1] + " " + time[2] + " " + time[3] + " " + time[4];	
+				
+			var rowcontend='<tr><td class="tcol">'+timeRow+'</td>'
+	  		               +'<td class="tcol">'+tRowData[i]+'</td>'
+	  		               +'<td class="tcol">'+hRowData[i]+'</td>'
+	  		               +'<td class="tcol">'+rRowData[i]+'</td>'
+	  		               +'<td class="tcol">'+sRowData[i]+'</td></tr>';
+			// var tbody = $('.paginated-table tbody');
+			// here can't use tbody: cause double data
+			cTable.append(rowcontend);
+		}
+		
+		else continue;
+	}
+	
+	var cRows = cTable.find('tr:gt(0)');
+	var cRowCount = cRows.size();
+	// console.log("cRowCount"+cRowCount);
+	
+	if (cRowCount < maxRows) {
+		return;
+	}
+	
+	cRows.filter(':gt(' + (maxRows - 1) + ')').hide();
+	
+	var cPrev = cTable.siblings('.prev');
+	var cNext = cTable.siblings('.next');
+	
+	cPrev.addClass('disabled');
+	
+	cPrev.click(function() {
+		var cFirstVisible = cRows.index(cRows.filter(':visible'));
+		if (cPrev.hasClass('disabled')) {
+			return false;
+		}
+		
+		cRows.hide();
+		if (cFirstVisible - maxRows - 1 > 0) {
+			cRows.filter(':lt(' + cFirstVisible + '):gt(' + (cFirstVisible - maxRows - 1) + ')').show();
+		} else {
+			cRows.filter(':lt(' + cFirstVisible + ')').show();
+		}
+		
+		if (cFirstVisible - maxRows <= 0) {
+			cPrev.addClass('disabled');
+		}
+		
+		cNext.removeClass('disabled');
+		return false;
+	});
+	
+	cNext.click(function() {
+		var cFirstVisible = cRows.index(cRows.filter(':visible'));
+		
+		if (cNext.hasClass('disabled')) {
+			return false;
+		}
+		
+		cRows.hide();
+		cRows.filter(':lt(' + (cFirstVisible +2 * maxRows) + '):gt(' + (cFirstVisible + maxRows - 1) + ')').show();
+		
+		if (cFirstVisible + 2 * maxRows >= cRows.size()) {
+			cNext.addClass('disabled');
+		}
+		
+		cPrev.removeClass('disabled');
+		return false;
+	});	
+}
 
 function updateView() {
 	
@@ -455,18 +553,64 @@ function updateView() {
 		setTimeout(function(){
 			newChartController.updateChart(chart, newData);
 			chart.hideLoading();
-		},300);
+			
+			$('.paginated-table tr').not(function(){if ($(this).has('th').length){return true}}).remove();
+			tableControl(newData);
+		},500);
 	}
 }
 
 function showRef() {
 	if(document.getElementById("checkRef").checked==true) {
 		newChartController.showReference(1);
+		
+		$(".paginated-table").each(function(){
+		        var cTable = $(this);
+		        var cRows = cTable.find('tr:gt(0)');
+			
+			// console.log(cols);
+			cRows.each(function(i,row) {
+				var cols = $(row).find("td");
+				$.each(cols, function(i, col) {
+					$(col).removeClass("tcol");
+				});
+				// console.log(cols);
+				$(cols[0]).addClass("tcol");
+				if(parseFloat(cols[1].innerHTML)>86) $(cols[1]).addClass("good");
+				else $(cols[1]).addClass("bad");
+			
+				if(parseFloat(cols[2].innerHTML)<70) $(cols[2]).addClass("good");
+				else $(cols[2]).addClass("bad");
+			
+				if(parseInt(cols[3].innerHTML)==0) $(cols[3]).addClass("good");
+				else $(cols[3]).addClass("bad");
+			
+				if(parseFloat(cols[4].innerHTML)>=600 && parseFloat(cols[4].innerHTML)<=700) $(cols[4]).addClass("good");
+				else $(cols[4]).addClass("bad");
+			});
+		});
 	}
 	else {
-		newChartController.showReference(0);
-	}
+			newChartController.showReference(0);
+			$(".paginated-table").each(function(){
+			        var cTable = $(this);
+			        var cRows = cTable.find('tr:gt(0)');
+			
+				// console.log(cols);
+				cRows.each(function(i,row) {
+					var cols = $(row).find("td");
+					$.each(cols, function(i, col) {
+						$(col).removeClass("good");
+						$(col).removeClass("bad");
+						$(col).addClass("tcol");
+					});
+				});
+			});
+		} 
+	
 }
+
+
 
 function startPage() {
 	
@@ -492,9 +636,10 @@ function startPage() {
        	 },
        	 series: [{
        		 marker: {
-       			 radius: 2
+       			 radius: 2.5
        		 },
-       		 lineWidth: 1,
+		 color: '#14446A',
+       		 lineWidth: 1.5,
        		 turboThreshold: 1000
        	 }]
         }); 
@@ -502,6 +647,6 @@ function startPage() {
         newDataController.requestData(newData);
         setTimeout(function(){ 
        	  newChartController.initialChart(newData);
-        },500);
+	  tableControl(newData); },500);
 }
 
